@@ -84,8 +84,4 @@ async def get_reference_images():
     for filename in os.listdir(REFERENCE_DIR):
         if filename.endswith(('.jpg', '.jpeg', '.png')):
             images.append(filename)
-    return {"images": images}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    return {"images": images} 
