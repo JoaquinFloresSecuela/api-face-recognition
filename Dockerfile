@@ -1,24 +1,25 @@
-# Usa una imagen oficial con Python 3.10 o 3.9
+# Usa una imagen de Python con herramientas de build
 FROM python:3.10-slim
 
-# Actualiza el sistema e instala cmake y otras dependencias necesarias
+# Instala dependencias necesarias para dlib
 RUN apt-get update && apt-get install -y \
-    cmake \
     build-essential \
+    cmake \
+    libopenblas-dev \
+    liblapack-dev \
+    libx11-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Crea un directorio de trabajo
+# Crea carpeta de trabajo
 WORKDIR /app
 
-# Copia los archivos del proyecto
+# Copia los archivos
 COPY . .
 
-# Instala las dependencias Python
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Instala dlib y demás dependencias
+RUN pip install --upgrade pip \
+    && pip install dlib==19.24.0 \
+    && pip install -r requirements.txt
 
-# Expón el puerto en que corre tu app (modifica según tu app)
-EXPOSE 8000
-
-# Comando para correr tu app
+# Comando por defecto
 CMD ["python", "api.py"]
