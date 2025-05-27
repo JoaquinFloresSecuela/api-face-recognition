@@ -5,3 +5,4 @@ dlib
 face-recognition
 setuptools
 wheel
+fastapi
