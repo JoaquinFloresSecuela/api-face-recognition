@@ -1,5 +1,5 @@
 # Usa una imagen de Python con herramientas de build
-FROM python:3.10-slim
+FROM python:3.9-slim
 
 # Instala dependencias necesarias para dlib
 RUN apt-get update && apt-get install -y \
