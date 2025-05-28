@@ -61,10 +61,6 @@ async def compare_faces(dni: UploadFile = File(...), selfie: UploadFile = File(.
             return {"error": "No se pudo decodificar la imagen de la selfie"}
         selfie_img = cv2.cvtColor(selfie_img, cv2.COLOR_BGR2RGB)
 
-        # Asegurarse de que las imágenes sean de 8 bits
-        dni_img = dni_img.astype(np.uint8)
-        selfie_img = selfie_img.astype(np.uint8)
-
         # Detectar cara en la imagen del DNI
         dni_face_locations = fr.face_locations(dni_img)
         if not dni_face_locations:
