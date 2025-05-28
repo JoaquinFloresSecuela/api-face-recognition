@@ -44,38 +44,49 @@ async def compare_faces(dni: UploadFile = File(...), selfie: UploadFile = File(.
     """
     Compara la cara de la foto del DNI con la de la selfie.
     """
-    # Leer la imagen del DNI
-    dni_contents = await dni.read()
-    dni_nparr = np.frombuffer(dni_contents, np.uint8)
-    dni_img = cv2.imdecode(dni_nparr, cv2.IMREAD_COLOR)
-    dni_img = cv2.cvtColor(dni_img, cv2.COLOR_BGR2RGB)
+    try:
+        # Leer la imagen del DNI
+        dni_contents = await dni.read()
+        dni_nparr = np.frombuffer(dni_contents, np.uint8)
+        dni_img = cv2.imdecode(dni_nparr, cv2.IMREAD_COLOR)
+        if dni_img is None:
+            return {"error": "No se pudo decodificar la imagen del DNI"}
+        dni_img = cv2.cvtColor(dni_img, cv2.COLOR_BGR2RGB)
 
-    # Leer la imagen de la selfie
-    selfie_contents = await selfie.read()
-    selfie_nparr = np.frombuffer(selfie_contents, np.uint8)
-    selfie_img = cv2.imdecode(selfie_nparr, cv2.IMREAD_COLOR)
-    selfie_img = cv2.cvtColor(selfie_img, cv2.COLOR_BGR2RGB)
+        # Leer la imagen de la selfie
+        selfie_contents = await selfie.read()
+        selfie_nparr = np.frombuffer(selfie_contents, np.uint8)
+        selfie_img = cv2.imdecode(selfie_nparr, cv2.IMREAD_COLOR)
+        if selfie_img is None:
+            return {"error": "No se pudo decodificar la imagen de la selfie"}
+        selfie_img = cv2.cvtColor(selfie_img, cv2.COLOR_BGR2RGB)
 
-    # Detectar cara en la imagen del DNI
-    dni_face_locations = fr.face_locations(dni_img)
-    if not dni_face_locations:
-        return {"error": "No se detectó ninguna cara en la imagen del DNI"}
-    dni_face_encoding = fr.face_encodings(dni_img, dni_face_locations)[0]
+        # Asegurarse de que las imágenes sean de 8 bits
+        dni_img = dni_img.astype(np.uint8)
+        selfie_img = selfie_img.astype(np.uint8)
 
-    # Detectar cara en la selfie
-    selfie_face_locations = fr.face_locations(selfie_img)
-    if not selfie_face_locations:
-        return {"error": "No se detectó ninguna cara en la selfie"}
-    selfie_face_encoding = fr.face_encodings(selfie_img, selfie_face_locations)[0]
+        # Detectar cara en la imagen del DNI
+        dni_face_locations = fr.face_locations(dni_img)
+        if not dni_face_locations:
+            return {"error": "No se detectó ninguna cara en la imagen del DNI"}
+        dni_face_encoding = fr.face_encodings(dni_img, dni_face_locations)[0]
 
-    # Comparar las dos caras
-    result = fr.compare_faces([dni_face_encoding], selfie_face_encoding, tolerance=0.6)[0]
-    distance = fr.face_distance([dni_face_encoding], selfie_face_encoding)[0]
+        # Detectar cara en la selfie
+        selfie_face_locations = fr.face_locations(selfie_img)
+        if not selfie_face_locations:
+            return {"error": "No se detectó ninguna cara en la selfie"}
+        selfie_face_encoding = fr.face_encodings(selfie_img, selfie_face_locations)[0]
 
-    return {
-        "match": bool(result),
-        "distance": float(distance)
-    }
+        # Comparar las dos caras
+        result = fr.compare_faces([dni_face_encoding], selfie_face_encoding, tolerance=0.6)[0]
+        distance = fr.face_distance([dni_face_encoding], selfie_face_encoding)[0]
+
+        return {
+            "match": bool(result),
+            "distance": float(distance)
+        }
+    except Exception as e:
+        return {"error": f"Error al procesar las imágenes: {str(e)}"}
 
 @app.get("/reference-images")
 async def get_reference_images():
