@@ -7,3 +7,4 @@ setuptools
 wheel
 fastapi
 uvicorn
+cv2
