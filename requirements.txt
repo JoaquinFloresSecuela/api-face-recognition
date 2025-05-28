@@ -6,3 +6,4 @@ face-recognition
 setuptools
 wheel
 fastapi
+uvicorn
